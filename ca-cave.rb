@@ -26,7 +26,7 @@ module Cave
     #   number between 0 and 1 inclusive, optional, defaults to 0.45)
     #
     def self.run(w, h, iters = 5, fill = 0.45)
-      new(w, h).to_s
+      new(w, h, iters, fill).to_s
     end
 
     #
@@ -62,7 +62,7 @@ module Cave
     #
     # Returns 1 if the given cell is filled or out of bounds and zero
     # otherwise.
-    # 
+    #
     def f(x, y, r, w, h)
       ok = (x >= 0) && (y >= 0) && (x < w) && (y < h)
       ok ? (r[y * w + x] ? 1 : 0) : 1
@@ -126,15 +126,40 @@ module Cave
   # Namespace for command-line interface.
   #
   module CLI
-    # default map size
-    DEFAULT_SIZE = [80, 30]
+    # default args
+    DEFAULTS = [{
+      val:  80,
+      type: :int,
+    }, {
+      val:  30,
+      type: :int,
+    }, {
+      val:  5,
+      type: :int,
+    }, {
+      val:  0.45,
+      type: :float,
+    }]
+
+    def self.get_args(args)
+      DEFAULTS.size.times.map { |i|
+        v = args[i] || DEFAULTS[i][:val]
+        case DEFAULTS[i][:type]
+        when :int
+          v.to_i
+        when :float
+          v.to_f
+        else
+          raise "unknown type"
+        end
+      }
+    end
 
     #
     # Command-line entry point
     #
     def self.run(app, args)
-      w, h = (args.size == 2) ? args.map { |v| v.to_i } : DEFAULT_SIZE
-      puts Map.run(w, h)
+      puts Map.run(*get_args(args))
     end
   end
 end
